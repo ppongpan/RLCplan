@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบบันทึกข้อมูลผลิตภัณฑ์ RLC</title>
+    <!-- Sweet Alert 2 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.1/sweetalert2.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.1/sweetalert2.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .tabs {
+            display: flex;
+            background: #95a5a6;
+            border-bottom: 1px solid #7f8c8d;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #e67e22;
+            border-bottom: 3px solid #e67e22;
+        }
+        
+        .tab:hover {
+            background: #bdc3c7;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #e67e22;
+            box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.1);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .submit-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            font-size: 0.8rem;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 8px 10px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .data-table th {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            font-size: 0.75rem;
+        }
+        
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .data-table td {
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            max-height: 600px;
+        }
+        
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .connection-status.connected {
+            background-color: #27ae60;
+        }
+        
+        .connection-status.disconnected {
+            background-color: #e74c3c;
+        }
+        
+        .connection-status.testing {
+            background-color: #f39c12;
+        }
+        
+        .loading-spinner {
+            border: 4px solid #95a5a6;
+            border-top: 4px solid #e67e22;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .data-table {
+                font-size: 0.7rem;
+            }
+            .data-table th,
+            .data-table td {
+                padding: 6px 4px;
+            }
+            .data-table th {
+                font-size: 0.65rem;
+            }
+        }
+        
+        .swal2-popup {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .swal2-confirm {
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%) !important;
+            border: none !important;
+            padding: 12px 30px !important;
+            font-size: 16px !important;
+            font-weight: 600 !important;
+        }
+        
+        .swal2-cancel {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%) !important;
+            border: none !important;
+            padding: 12px 30px !important;
+            font-size: 16px !important;
+            font-weight: 600 !important;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="connectionStatus" class="connection-status testing">กำลังตรวจสอบการเชื่อมต่อ...</div>
+
+    <div class="container">
+        <div class="header">
+            <h1>ระบบบันทึกข้อมูลผลิตภัณฑ์ RLC</h1>
+            <p>>แผนสั่งผลิต Counter & Lintel
+                <</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('form')">บันทึกข้อมูล</button>
+            <button class="tab" onclick="showTab('data')">ดูข้อมูล</button>
+        </div>
+
+        <div id="form-tab" class="tab-content active">
+            <h2 style="margin-bottom: 20px; color: #333;">บันทึกข้อมูลผลิตภัณฑ์คอนกรีต</h2>
+
+            <form id="productionForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="recordDate">วันที่บันทึก:</label>
+                        <input type="date" id="recordDate" name="recordDate" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dataEntry">ผู้กรอกข้อมูล:</label>
+                        <input type="text" id="dataEntry" name="dataEntry" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="plant">โรงงาน (Plant):</label>
+                        <select id="plant" name="plant" required>
+                            <option value="">เลือกโรงงาน</option>
+                            <option value="บางปะอิน">บางปะอิน</option>
+                            <option value="ระยอง">ระยอง</option>
+                            <option value="สระบุรี">สระบุรี</option>
+                            <option value="สงขลา">สงขลา</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="projectName">ชื่อ ผทจ หรือ ชื่อโครงการที่สั่งผลิต:</label>
+                        <input type="text" id="projectName" name="projectName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productType">สินค้า:</label>
+                        <select id="productType" name="productType" required onchange="updateWidthAndCounterPart()">
+                            <option value="">เลือกประเภทสินค้า</option>
+                            <option value="Lintel">Lintel</option>
+                            <option value="Counter">Counter</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="counterPart">Counter Part:</label>
+                        <select id="counterPart" name="counterPart" required>
+                            <option value="">เลือก Counter Part</option>
+                            <option value="CT">CT</option>
+                            <option value="CF">CF</option>
+                            <option value="CC">CC</option>
+                            <option value="CG">CG</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="width">ความกว้าง:</label>
+                        <input type="number" id="width" name="width" step="0.1" readonly style="background-color: #f8f9fa;">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="length">ความยาว:</label>
+                        <input type="number" id="length" name="length" step="0.1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="thickness">ความหนา:</label>
+                        <select id="thickness" name="thickness" required>
+                            <option value="">เลือกความหนา</option>
+                            <option value="7.5">7.5</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                            <option value="12.5">12.5</option>
+                            <option value="15">15</option>
+                            <option value="17.5">17.5</option>
+                            <option value="20">20</option>
+                            <option value="22.5">22.5</option>
+                            <option value="25">25</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="quantity">จำนวน:</label>
+                        <input type="number" id="quantity" name="quantity" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="requiredDate">ระบุวันที่ต้องการสินค้า:</label>
+                        <input type="date" id="requiredDate" name="requiredDate" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">หมายเหตุ:</label>
+                    <textarea id="notes" name="notes" placeholder="ระบุหมายเหตุ (ถ้ามี)"></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">บันทึกข้อมูล</button>
+            </form>
+        </div>
+
+        <div id="data-tab" class="tab-content">
+            <h2 style="margin-bottom: 20px; color: #333;">ข้อมูลผลิตภัณฑ์คอนกรีต</h2>
+
+            <div class="table-container">
+                <table class="data-table" id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>วันที่บันทึก</th>
+                            <th>ผู้กรอกข้อมูล</th>
+                            <th>โรงงาน</th>
+                            <th>ชื่อโครงการ</th>
+                            <th>สินค้า</th>
+                            <th>Counter Part</th>
+                            <th>ความกว้าง</th>
+                            <th>ความยาว</th>
+                            <th>ความหนา</th>
+                            <th>จำนวน</th>
+                            <th>วันที่ต้องการ</th>
+                            <th>หมายเหตุ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Google Apps Script URL - แทนที่ด้วย URL ของ Google Apps Script ที่คุณสร้าง
+        // วิธีการได้ URL:
+        // 1. ไปที่ script.google.com
+        // 2. สร้าง New project
+        // 3. วาง Google Apps Script code ที่ให้มา
+        // 4. กด Deploy > New deployment
+        // 5. เลือก type เป็น Web app
+        // 6. Execute as: Me
+        // 7. Who has access: Anyone
+        // 8. กด Deploy และ copy URL ที่ได้
+        // หมายเหตุ: Telegram notification ถูกปิดใช้งานแล้ว (สามารถเปิดใช้ในอนาคตได้)
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwZXBtD3Emy4pWg0H_YNt9S_rlXKG632Pd6unl79uLt7wU7Ns4JmXZK_inp8P_TDAyk/exec';
+
+        let connectionStatus = 'testing';
+
+        // Generate random ID
+        function generateRandomId() {
+            const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < 8; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        // Update width based on product type
+        function updateWidthAndCounterPart() {
+            const productType = document.getElementById('productType').value;
+            const widthField = document.getElementById('width');
+
+            if (productType === 'Lintel') {
+                widthField.value = 20;
+            } else if (productType === 'Counter') {
+                widthField.value = 56;
+            } else {
+                widthField.value = '';
+            }
+
+            // Add visual feedback for width
+            if (widthField.value) {
+                widthField.style.backgroundColor = '#e8f5e8';
+                setTimeout(() => {
+                    widthField.style.backgroundColor = '#f8f9fa';
+                }, 1000);
+            }
+        }
+
+        // Update connection status indicator
+        function updateConnectionStatus(status, message) {
+            const statusElement = document.getElementById('connectionStatus');
+            connectionStatus = status;
+
+            statusElement.className = `connection-status ${status}`;
+            statusElement.textContent = message;
+
+            if (status === 'connected') {
+                setTimeout(() => {
+                    statusElement.style.opacity = '0';
+                    setTimeout(() => {
+                        statusElement.style.display = 'none';
+                    }, 300);
+                }, 3000);
+            } else {
+                statusElement.style.opacity = '1';
+                statusElement.style.display = 'block';
+            }
+        }
+
+        // Test connection to Google Apps Script
+        async function testConnection() {
+            try {
+                updateConnectionStatus('testing', 'กำลังตรวจสอบการเชื่อมต่อ...');
+
+                const response = await fetch(GOOGLE_SCRIPT_URL + '?action=test', {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    updateConnectionStatus('connected', 'เชื่อมต่อสำเร็จ');
+                    return true;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Connection test failed:', error);
+                updateConnectionStatus('disconnected', 'การเชื่อมต่อล้มเหลว');
+                return false;
+            }
+        }
+
+        // Show loading overlay
+        function showLoading(message = 'กำลังประมวลผล...') {
+            Swal.fire({
+                title: message,
+                html: '<div class="loading-spinner"></div>',
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            });
+        }
+
+        // Show success message
+        function showSuccess(title, message) {
+            Swal.fire({
+                icon: 'success',
+                title: title,
+                text: message,
+                confirmButtonText: 'ตกลง',
+                timer: 3000,
+                timerProgressBar: true
+            });
+        }
+
+        // Show error message
+        function showError(title, message) {
+            Swal.fire({
+                icon: 'error',
+                title: title,
+                text: message,
+                confirmButtonText: 'ตกลง'
+            });
+        }
+
+        // Show confirmation dialog
+        function showConfirmation(title, message) {
+            return Swal.fire({
+                title: title,
+                text: message,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'ใช่, ดำเนินการ',
+                cancelButtonText: 'ยกเลิก',
+                reverseButtons: true
+            });
+        }
+
+        // Tab switching
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            document.querySelectorAll('.tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabName === 'data') {
+                loadData();
+            }
+        }
+
+        // Format date for display
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('th-TH');
+        }
+
+        // Submit form
+        document.getElementById('productionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const confirmResult = await showConfirmation(
+                'ยืนยันการบันทึกข้อมูล',
+                'คุณต้องการบันทึกข้อมูลผลิตภัณฑ์นี้หรือไม่?'
+            );
+
+            if (!confirmResult.isConfirmed) {
+                return;
+            }
+
+            const formData = new FormData(this);
+            const data = {};
+            const submitBtn = document.getElementById('submitBtn');
+
+            data.id = generateRandomId();
+            data.action = 'save';
+
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'กำลังบันทึก...';
+
+                showLoading('กำลังบันทึกข้อมูลไปยัง Google Sheets...');
+
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    headers: {
+                        'Content-Type': 'text/plain',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                Swal.close();
+
+                if (result.success) {
+                    showSuccess('บันทึกสำเร็จ!', `ข้อมูลผลิตภัณฑ์ ID: ${data.id} ได้รับการบันทึกเรียบร้อยแล้ว`);
+                    this.reset();
+
+                    // Set today's date
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('recordDate').value = today;
+
+                    updateConnectionStatus('connected', 'เชื่อมต่อสำเร็จ');
+                } else {
+                    showError('เกิดข้อผิดพลาด', result.message || 'ไม่สามารถบันทึกข้อมูลได้');
+                }
+
+            } catch (error) {
+                Swal.close();
+                console.error('Network error:', error);
+
+                updateConnectionStatus('disconnected', 'การเชื่อมต่อล้มเหลว');
+
+                showError(
+                    'เกิดข้อผิดพลาดในการเชื่อมต่อ',
+                    'ไม่สามารถเชื่อมต่อกับ Google Sheets ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตและลองใหม่อีกครั้ง'
+                );
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'บันทึกข้อมูล';
+            }
+        });
+
+        // Load data from Google Sheets
+        async function loadData() {
+            const tableBody = document.getElementById('dataTableBody');
+
+            try {
+                tableBody.innerHTML = '<tr><td colspan="13" style="text-align: center; padding: 40px;"><div class="loading-spinner" style="margin: 0 auto 20px;"></div>กำลังโหลดข้อมูลจาก Google Sheets...</td></tr>';
+
+                const response = await fetch(GOOGLE_SCRIPT_URL + '?action=load', {
+                    method: 'GET',
+                    mode: 'cors',
+                    cache: 'no-cache'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success && result.data && result.data.length > 0) {
+                    tableBody.innerHTML = '';
+                    result.data.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td title="${item.id || ''}">${item.id || ''}</td>
+                            <td title="${formatDate(item.recordDate)}">${formatDate(item.recordDate)}</td>
+                            <td title="${item.dataEntry || ''}">${item.dataEntry || ''}</td>
+                            <td title="${item.plant || ''}">${item.plant || ''}</td>
+                            <td title="${item.projectName || ''}">${item.projectName || ''}</td>
+                            <td title="${item.productType || ''}">${item.productType || ''}</td>
+                            <td title="${item.counterPart || ''}">${item.counterPart || ''}</td>
+                            <td title="${item.width || ''}">${item.width || ''}</td>
+                            <td title="${item.length || ''}">${item.length || ''}</td>
+                            <td title="${item.thickness || ''}">${item.thickness || ''}</td>
+                            <td title="${item.quantity || ''}">${item.quantity || ''}</td>
+                            <td title="${formatDate(item.requiredDate)}">${formatDate(item.requiredDate)}</td>
+                            <td title="${item.notes || ''}">${item.notes || ''}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+
+                    updateConnectionStatus('connected', 'เชื่อมต่อสำเร็จ');
+
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: `โหลดข้อมูลสำเร็จ (${result.data.length} รายการ)`,
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="13" style="text-align: center; padding: 40px; color: #6c757d;">ไม่มีข้อมูลในระบบ</td></tr>';
+                    updateConnectionStatus('connected', 'เชื่อมต่อสำเร็จ');
+                }
+
+            } catch (error) {
+                console.error('Error loading data:', error);
+                tableBody.innerHTML = '<tr><td colspan="13" style="text-align: center; padding: 40px; color: red;">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
+
+                updateConnectionStatus('disconnected', 'การเชื่อมต่อล้มเหลว');
+
+                showError('เกิดข้อผิดพลาดในการโหลดข้อมูล',
+                    'ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้ กรุณาตรวจสอบการเชื่อมต่อและลองใหม่อีกครั้ง');
+            }
+        }
+
+        // Set current date on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('recordDate').value = today;
+
+            // Test connection on load
+            await testConnection();
+
+            Swal.fire({
+                title: 'ยินดีต้อนรับ!',
+                text: 'ระบบบันทึกข้อมูลผลิตภัณฑ์คอนกรีตพร้อมใช้งานแล้ว',
+                icon: 'success',
+                confirmButtonText: 'เริ่มใช้งาน',
+                timer: 3000,
+                timerProgressBar: true
+            });
+        });
+
+        // Auto-retry connection every 30 seconds if disconnected
+        setInterval(async function() {
+            if (connectionStatus === 'disconnected') {
+                console.log('Auto-retrying connection...');
+                await testConnection();
+            }
+        }, 30000);
+    </script>
+</body>
+
+</html>
