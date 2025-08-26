@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบบันทึกข้อมูลผลิตภัณฑ์ RLC</title>
-    <!-- Sweet Alert 2 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.1/sweetalert2.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.1/sweetalert2.min.css">
     <style>
@@ -286,34 +285,28 @@
 
 <body>
     <div id="connectionStatus" class="connection-status testing">กำลังตรวจสอบการเชื่อมต่อ...</div>
-
     <div class="container">
         <div class="header">
             <h1>ระบบบันทึกข้อมูลผลิตภัณฑ์ RLC</h1>
             <p>>แผนสั่งผลิต Counter & Lintel
                 <</p>
         </div>
-
         <div class="tabs">
             <button class="tab active" onclick="showTab('form')">บันทึกข้อมูล</button>
             <button class="tab" onclick="showTab('data')">ดูข้อมูล</button>
         </div>
-
         <div id="form-tab" class="tab-content active">
             <h2 style="margin-bottom: 20px; color: #333;">บันทึกข้อมูลผลิตภัณฑ์คอนกรีต</h2>
-
             <form id="productionForm">
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="recordDate">วันที่บันทึก:</label>
                         <input type="date" id="recordDate" name="recordDate" required>
                     </div>
-
                     <div class="form-group">
                         <label for="dataEntry">ผู้กรอกข้อมูล:</label>
                         <input type="text" id="dataEntry" name="dataEntry" required>
                     </div>
-
                     <div class="form-group">
                         <label for="plant">โรงงาน (Plant):</label>
                         <select id="plant" name="plant" required>
@@ -324,12 +317,10 @@
                             <option value="สงขลา">สงขลา</option>
                         </select>
                     </div>
-
                     <div class="form-group">
                         <label for="projectName">ชื่อ ผทจ หรือ ชื่อโครงการที่สั่งผลิต:</label>
                         <input type="text" id="projectName" name="projectName" required>
                     </div>
-
                     <div class="form-group">
                         <label for="productType">สินค้า:</label>
                         <select id="productType" name="productType" required onchange="updateWidthAndCounterPart()">
@@ -338,8 +329,7 @@
                             <option value="Counter">Counter</option>
                         </select>
                     </div>
-
-                    <div class="form-group">
+                    <div class="form-group" id="counterPartGroup">
                         <label for="counterPart">Counter Part:</label>
                         <select id="counterPart" name="counterPart" required>
                             <option value="">เลือก Counter Part</option>
@@ -350,18 +340,15 @@
                         </select>
                     </div>
                 </div>
-
                 <div class="form-row">
                     <div class="form-group">
                         <label for="width">ความกว้าง:</label>
                         <input type="number" id="width" name="width" step="0.1" readonly style="background-color: #f8f9fa;">
                     </div>
-
                     <div class="form-group">
                         <label for="length">ความยาว:</label>
                         <input type="number" id="length" name="length" step="0.1" required>
                     </div>
-
                     <div class="form-group">
                         <label for="thickness">ความหนา:</label>
                         <select id="thickness" name="thickness" required>
@@ -378,31 +365,25 @@
                         </select>
                     </div>
                 </div>
-
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="quantity">จำนวน:</label>
                         <input type="number" id="quantity" name="quantity" required>
                     </div>
-
                     <div class="form-group">
                         <label for="requiredDate">ระบุวันที่ต้องการสินค้า:</label>
                         <input type="date" id="requiredDate" name="requiredDate" required>
                     </div>
                 </div>
-
                 <div class="form-group">
                     <label for="notes">หมายเหตุ:</label>
                     <textarea id="notes" name="notes" placeholder="ระบุหมายเหตุ (ถ้ามี)"></textarea>
                 </div>
-
                 <button type="submit" class="submit-btn" id="submitBtn">บันทึกข้อมูล</button>
             </form>
         </div>
-
         <div id="data-tab" class="tab-content">
             <h2 style="margin-bottom: 20px; color: #333;">ข้อมูลผลิตภัณฑ์คอนกรีต</h2>
-
             <div class="table-container">
                 <table class="data-table" id="dataTable">
                     <thead>
@@ -428,7 +409,6 @@
             </div>
         </div>
     </div>
-
     <script>
         // Google Apps Script URL - แทนที่ด้วย URL ของ Google Apps Script ที่คุณสร้าง
         // วิธีการได้ URL:
@@ -442,12 +422,11 @@
         // 8. กด Deploy และ copy URL ที่ได้
         // หมายเหตุ: Telegram notification ถูกปิดใช้งานแล้ว (สามารถเปิดใช้ในอนาคตได้)
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwZXBtD3Emy4pWg0H_YNt9S_rlXKG632Pd6unl79uLt7wU7Ns4JmXZK_inp8P_TDAyk/exec';
-
         let connectionStatus = 'testing';
 
         // Generate random ID
         function generateRandomId() {
-            const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            const chars = 'abcdefghijklmnopqrstuvwxyz012000089';
             let result = '';
             for (let i = 0; i < 8; i++) {
                 result += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -455,17 +434,26 @@
             return result;
         }
 
-        // Update width based on product type
+        // Update width and Counter Part visibility based on product type
         function updateWidthAndCounterPart() {
             const productType = document.getElementById('productType').value;
             const widthField = document.getElementById('width');
+            const counterPartGroup = document.getElementById('counterPartGroup');
+            const counterPartSelect = document.getElementById('counterPart');
 
             if (productType === 'Lintel') {
                 widthField.value = 20;
+                counterPartGroup.style.display = 'none'; // ซ่อน
+                counterPartSelect.required = false;
+                counterPartSelect.value = ''; // เคลียร์ค่าที่เลือกไว้
             } else if (productType === 'Counter') {
                 widthField.value = 56;
+                counterPartGroup.style.display = 'block'; // แสดง
+                counterPartSelect.required = true;
             } else {
                 widthField.value = '';
+                counterPartGroup.style.display = 'block';
+                counterPartSelect.required = true;
             }
 
             // Add visual feedback for width
@@ -477,14 +465,13 @@
             }
         }
 
+
         // Update connection status indicator
         function updateConnectionStatus(status, message) {
             const statusElement = document.getElementById('connectionStatus');
             connectionStatus = status;
-
             statusElement.className = `connection-status ${status}`;
             statusElement.textContent = message;
-
             if (status === 'connected') {
                 setTimeout(() => {
                     statusElement.style.opacity = '0';
@@ -502,12 +489,10 @@
         async function testConnection() {
             try {
                 updateConnectionStatus('testing', 'กำลังตรวจสอบการเชื่อมต่อ...');
-
                 const response = await fetch(GOOGLE_SCRIPT_URL + '?action=test', {
                     method: 'GET',
                     mode: 'cors'
                 });
-
                 if (response.ok) {
                     const result = await response.json();
                     updateConnectionStatus('connected', 'เชื่อมต่อสำเร็จ');
@@ -568,19 +553,16 @@
             });
         }
 
-        // Tab switching
+        // Tab switching function
         function showTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
-
             document.querySelectorAll('.tab').forEach(btn => {
                 btn.classList.remove('active');
             });
-
             document.getElementById(tabName + '-tab').classList.add('active');
             event.target.classList.add('active');
-
             if (tabName === 'data') {
                 loadData();
             }
@@ -596,7 +578,6 @@
         // Submit form
         document.getElementById('productionForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-
             const confirmResult = await showConfirmation(
                 'ยืนยันการบันทึกข้อมูล',
                 'คุณต้องการบันทึกข้อมูลผลิตภัณฑ์นี้หรือไม่?'
@@ -609,10 +590,8 @@
             const formData = new FormData(this);
             const data = {};
             const submitBtn = document.getElementById('submitBtn');
-
             data.id = generateRandomId();
             data.action = 'save';
-
             for (let [key, value] of formData.entries()) {
                 data[key] = value;
             }
@@ -620,7 +599,6 @@
             try {
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'กำลังบันทึก...';
-
                 showLoading('กำลังบันทึกข้อมูลไปยัง Google Sheets...');
 
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
@@ -638,28 +616,23 @@
                 }
 
                 const result = await response.json();
-
                 Swal.close();
 
                 if (result.success) {
                     showSuccess('บันทึกสำเร็จ!', `ข้อมูลผลิตภัณฑ์ ID: ${data.id} ได้รับการบันทึกเรียบร้อยแล้ว`);
                     this.reset();
-
                     // Set today's date
                     const today = new Date().toISOString().split('T')[0];
                     document.getElementById('recordDate').value = today;
-
+                    updateWidthAndCounterPart(); // Call to reset visibility
                     updateConnectionStatus('connected', 'เชื่อมต่อสำเร็จ');
                 } else {
                     showError('เกิดข้อผิดพลาด', result.message || 'ไม่สามารถบันทึกข้อมูลได้');
                 }
-
             } catch (error) {
                 Swal.close();
                 console.error('Network error:', error);
-
                 updateConnectionStatus('disconnected', 'การเชื่อมต่อล้มเหลว');
-
                 showError(
                     'เกิดข้อผิดพลาดในการเชื่อมต่อ',
                     'ไม่สามารถเชื่อมต่อกับ Google Sheets ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตและลองใหม่อีกครั้ง'
@@ -673,10 +646,8 @@
         // Load data from Google Sheets
         async function loadData() {
             const tableBody = document.getElementById('dataTableBody');
-
             try {
                 tableBody.innerHTML = '<tr><td colspan="13" style="text-align: center; padding: 40px;"><div class="loading-spinner" style="margin: 0 auto 20px;"></div>กำลังโหลดข้อมูลจาก Google Sheets...</td></tr>';
-
                 const response = await fetch(GOOGLE_SCRIPT_URL + '?action=load', {
                     method: 'GET',
                     mode: 'cors',
@@ -693,26 +664,22 @@
                     tableBody.innerHTML = '';
                     result.data.forEach(item => {
                         const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td title="${item.id || ''}">${item.id || ''}</td>
-                            <td title="${formatDate(item.recordDate)}">${formatDate(item.recordDate)}</td>
-                            <td title="${item.dataEntry || ''}">${item.dataEntry || ''}</td>
-                            <td title="${item.plant || ''}">${item.plant || ''}</td>
-                            <td title="${item.projectName || ''}">${item.projectName || ''}</td>
-                            <td title="${item.productType || ''}">${item.productType || ''}</td>
-                            <td title="${item.counterPart || ''}">${item.counterPart || ''}</td>
-                            <td title="${item.width || ''}">${item.width || ''}</td>
-                            <td title="${item.length || ''}">${item.length || ''}</td>
-                            <td title="${item.thickness || ''}">${item.thickness || ''}</td>
-                            <td title="${item.quantity || ''}">${item.quantity || ''}</td>
-                            <td title="${formatDate(item.requiredDate)}">${formatDate(item.requiredDate)}</td>
-                            <td title="${item.notes || ''}">${item.notes || ''}</td>
-                        `;
+                        row.innerHTML = `<td title="${item.id || ''}">${item.id || ''}</td>
+                                    <td title="${formatDate(item.recordDate)}">${formatDate(item.recordDate)}</td>
+                                    <td title="${item.dataEntry || ''}">${item.dataEntry || ''}</td>
+                                    <td title="${item.plant || ''}">${item.plant || ''}</td>
+                                    <td title="${item.projectName || ''}">${item.projectName || ''}</td>
+                                    <td title="${item.productType || ''}">${item.productType || ''}</td>
+                                    <td title="${item.counterPart || ''}">${item.counterPart || ''}</td>
+                                    <td title="${item.width || ''}">${item.width || ''}</td>
+                                    <td title="${item.length || ''}">${item.length || ''}</td>
+                                    <td title="${item.thickness || ''}">${item.thickness || ''}</td>
+                                    <td title="${item.quantity || ''}">${item.quantity || ''}</td>
+                                    <td title="${formatDate(item.requiredDate)}">${formatDate(item.requiredDate)}</td>
+                                    <td title="${item.notes || ''}">${item.notes || ''}</td>`;
                         tableBody.appendChild(row);
                     });
-
                     updateConnectionStatus('connected', 'เชื่อมต่อสำเร็จ');
-
                     Swal.fire({
                         toast: true,
                         position: 'top-end',
@@ -725,22 +692,19 @@
                     tableBody.innerHTML = '<tr><td colspan="13" style="text-align: center; padding: 40px; color: #6c757d;">ไม่มีข้อมูลในระบบ</td></tr>';
                     updateConnectionStatus('connected', 'เชื่อมต่อสำเร็จ');
                 }
-
             } catch (error) {
                 console.error('Error loading data:', error);
                 tableBody.innerHTML = '<tr><td colspan="13" style="text-align: center; padding: 40px; color: red;">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
-
                 updateConnectionStatus('disconnected', 'การเชื่อมต่อล้มเหลว');
-
-                showError('เกิดข้อผิดพลาดในการโหลดข้อมูล',
-                    'ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้ กรุณาตรวจสอบการเชื่อมต่อและลองใหม่อีกครั้ง');
+                showError('เกิดข้อผิดพลาดในการโหลดข้อมูล', 'ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้ กรุณาตรวจสอบการเชื่อมต่อและลองใหม่อีกครั้ง');
             }
         }
 
-        // Set current date on page load
+        // Set current date on page load and run initial functions
         document.addEventListener('DOMContentLoaded', async function() {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('recordDate').value = today;
+            updateWidthAndCounterPart(); // Call on page load to set initial state
 
             // Test connection on load
             await testConnection();
